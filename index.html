@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>던전 마스터의 시험 - RPG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #4a90e2;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #b0b0b0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            background: #2a2a3e;
+            border: 1px solid #4a90e2;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .save-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .save-slot {
+            background: #2a2a3e;
+            border: 1px solid #4a90e2;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-slot:hover {
+            background: #3a3a4e;
+            border-color: #5aa0f2;
+        }
+
+        .save-slot.empty {
+            opacity: 0.7;
+            border-style: dashed;
+        }
+
+        .slot-header {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .slot-info {
+            font-size: 14px;
+            color: #b0b0b0;
+        }
+
+        .game-ui {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        .game-main {
+            background: #2a2a3e;
+            border-radius: 5px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .game-sidebar {
+            background: #2a2a3e;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .story-text {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #2a4a2a;
+            border: 1px solid #4a9a4a;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #3a5a3a;
+            border-color: #5aaa5a;
+        }
+
+        .player-stats {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .stat-bar {
+            background: #333;
+            height: 20px;
+            border-radius: 10px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .hp-bar { background: #e74c3c; }
+        .mp-bar { background: #3498db; }
+        .exp-bar { background: #f39c12; }
+
+        .inventory {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 5px;
+        }
+
+        .success-message {
+            color: #27ae60;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .game-ui {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .game-sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 로그인 화면 -->
+        <div id="loginScreen" class="screen active">
+            <h1>🏰 던전 마스터의 시험</h1>
+            <div class="login-form">
+                <div class="input-group">
+                    <label for="userId">사용자 ID를 입력하세요:</label>
+                    <input type="text" id="userId" placeholder="admin, player1, guest 등" autocomplete="off">
+                </div>
+                <button id="loginBtn">로그인</button>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: rgba(74, 144, 226, 0.1); border-radius: 5px;">
+                    <h3>사용 가능한 계정:</h3>
+                    <ul style="text-align: left; margin: 10px 0;">
+                        <li><strong>admin</strong> - 관리자 계정</li>
+                        <li><strong>player1</strong> - 플레이어 계정</li>
+                        <li><strong>guest</strong> - 게스트 계정</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메인 메뉴 (세이브 슬롯 선택) -->
+        <div id="mainMenu" class="screen">
+            <h2>🎮 세이브 슬롯 선택</h2>
+            <div class="save-slots" id="saveSlots">
+                <!-- 동적으로 생성됨 -->
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="logoutBtn">로그아웃</button>
+            </div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div id="gameScreen" class="screen">
+            <div class="game-ui">
+                <div class="game-main">
+                    <div class="story-text" id="storyText">
+                        게임을 로드하는 중...
+                    </div>
+                    <div class="actions" id="gameActions">
+                        <!-- 동적으로 생성됨 -->
+                    </div>
+                </div>
+                
+                <div class="game-sidebar">
+                    <div class="player-stats" id="playerStats">
+                        <!-- 동적으로 생성됨 -->
+                    </div>
+                    
+                    <div class="inventory" id="playerInventory">
+                        <h4>📦 인벤토리</h4>
+                        <div id="inventoryItems">
+                            <!-- 동적으로 생성됨 -->
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button id="saveGameBtn">💾 저장</button>
+                        <button id="backToMenuBtn">📋 메뉴</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentUser = null;
+        let currentSaveSlot = null;
+        let gameState = null;
+        let dbManager = null;
+
+        // 하드코딩된 사용자 목록
+        const VALID_USERS = {
+            'admin': {
+                userId: 'admin',
+                displayName: '관리자',
+                role: 'admin',
+                createdAt: '2024-01-01'
+            },
+            'player1': {
+                userId: 'player1', 
+                displayName: '플레이어1',
+                role: 'player',
+                createdAt: '2024-01-01'
+            },
+            'guest': {
+                userId: 'guest',
+                displayName: '게스트',
+                role: 'guest',
+                createdAt: '2024-01-01'
+            }
+        };
+
+        // 앱 초기화
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                dbManager = new IndexedDBManager();
+                await dbManager.initialize();
+                console.log('게임 초기화 완료');
+                
+                setupEventListeners();
+            } catch (error) {
+                console.error('게임 초기화 실패:', error);
+                showError('게임을 초기화할 수 없습니다. 브라우저가 IndexedDB를 지원하지 않을 수 있습니다.');
+            }
+        });
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            // 로그인
+            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+            document.getElementById('userId').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+
+            // 로그아웃
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+            // 게임 관련
+            document.getElementById('saveGameBtn').addEventListener('click', saveGame);
+            document.getElementById('backToMenuBtn').addEventListener('click', backToMenu);
+        }
+
+        // 화면 전환
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 에러/성공 메시지 표시
+        function showError(message) {
+            const errorDiv = document.getElementById('loginError');
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function showSuccess(message) {
+            // 성공 메시지 표시 로직 (필요시 구현)
+            console.log('Success:', message);
+        }
+
+        // 로그인 처리
+        async function handleLogin() {
+            const userId = document.getElementById('userId').value.trim().toLowerCase();
+            
+            if (!userId) {
+                showError('사용자 ID를 입력해주세요.');
+                return;
+            }
+
+            if (!VALID_USERS[userId]) {
+                showError('등록되지 않은 사용자 ID입니다.');
+                return;
+            }
+
+            try {
+                currentUser = VALID_USERS[userId];
+                
+                // 사용자 로그인 기록 업데이트
+                await dbManager.updateUserLogin(userId);
+                
+                showMainMenu();
+                showSuccess(`${currentUser.displayName}님, 환영합니다!`);
+            } catch (error) {
+                console.error('로그인 실패:', error);
+                showError('로그인 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 로그아웃 처리
+        function handleLogout() {
+            currentUser = null;
+            currentSaveSlot = null;
+            gameState = null;
+            document.getElementById('userId').value = '';
+            showScreen('loginScreen');
+        }
+
+        // 메인 메뉴 표시
+        async function showMainMenu() {
+            showScreen('mainMenu');
+            await loadSaveSlots();
+        }
+
+        // 세이브 슬롯 로드
+        async function loadSaveSlots() {
+            const slotsContainer = document.getElementById('saveSlots');
+            slotsContainer.innerHTML = '';
+
+            try {
+                const saves = await dbManager.getUserSaves(currentUser.userId);
+                
+                for (let slot = 1; slot <= 3; slot++) {
+                    const saveData = saves.find(s => s.saveSlot === slot);
+                    const slotElement = createSaveSlotElement(slot, saveData);
+                    slotsContainer.appendChild(slotElement);
+                }
+            } catch (error) {
+                console.error('세이브 슬롯 로드 실패:', error);
+                showError('세이브 데이터를 불러올 수 없습니다.');
+            }
+        }
+
+        // 세이브 슬롯 요소 생성
+        function createSaveSlotElement(slotNumber, saveData) {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = `save-slot ${saveData ? '' : 'empty'}`;
+            slotDiv.addEventListener('click', () => selectSaveSlot(slotNumber, saveData));
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'slot-header';
+            headerDiv.textContent = `슬롯 ${slotNumber}`;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'slot-info';
+
+            if (saveData) {
+                const lastSaved = new Date(saveData.metadata.lastSaved).toLocaleString();
+                const player = saveData.gameState.player;
+                infoDiv.innerHTML = `
+                    <strong>${player.name}</strong> (레벨 ${player.level})<br>
+                    ${saveData.metadata.saveDescription || '저장된 게임'}<br>
+                    <small>마지막 저장: ${lastSaved}</small>
+                `;
+            } else {
+                infoDiv.innerHTML = '<em>비어있는 슬롯<br>새 게임 시작</em>';
+            }
+
+            slotDiv.appendChild(headerDiv);
+            slotDiv.appendChild(infoDiv);
+
+            return slotDiv;
+        }
+
+        // 세이브 슬롯 선택
+        async function selectSaveSlot(slotNumber, saveData) {
+            currentSaveSlot = slotNumber;
+
+            try {
+                if (saveData) {
+                    // 기존 세이브 로드
+                    gameState = saveData.gameState;
+                    console.log('기존 게임 로드됨:', gameState);
+                } else {
+                    // 새 게임 시작
+                    gameState = createNewGameState();
+                    console.log('새 게임 시작됨:', gameState);
+                }
+
+                startGame();
+            } catch (error) {
+                console.error('게임 시작 실패:', error);
+                showError('게임을 시작할 수 없습니다.');
+            }
+        }
+
+        // 새 게임 상태 생성
+        function createNewGameState() {
+            return {
+                player: {
+                    name: `${currentUser.displayName}의 영웅`,
+                    level: 1,
+                    hp: 100,
+                    maxHp: 100,
+                    mp: 20,
+                    maxMp: 20,
+                    exp: 0,
+                    expToNext: 100,
+                    gold: 50,
+                    stats: {
+                        strength: 10,
+                        defense: 8,
+                        agility: 12,
+                        magic: 6
+                    },
+                    inventory: [
+                        { id: 'sword', name: '녹슨 검', type: 'weapon', attack: 5 },
+                        { id: 'health_potion', name: '체력 포션', type: 'consumable', count: 3 }
+                    ]
+                },
+                currentScene: 'town_start',
+                progress: {
+                    completedQuests: [],
+                    unlockedAreas: ['town'],
+                    flags: {}
+                },
+                statistics: {
+                    playTime: 0,
+                    monstersKilled: 0,
+                    goldEarned: 0,
+                    questsCompleted: 0
+                }
+            };
+        }
+
+        // 게임 시작
+        function startGame() {
+            showScreen('gameScreen');
+            updateUI();
+            loadCurrentScene();
+        }
+
+        // UI 업데이트
+        function updateUI() {
+            updatePlayerStats();
+            updateInventory();
+        }
+
+        // 플레이어 스탯 업데이트
+        function updatePlayerStats() {
+            const player = gameState.player;
+            const statsContainer = document.getElementById('playerStats');
+            
+            statsContainer.innerHTML = `
+                <h4>⚔️ ${player.name}</h4>
+                <div>레벨 ${player.level} (경험치: ${player.exp}/${player.expToNext})</div>
+                <div>💰 골드: ${player.gold}</div>
+                
+                <div style="margin: 10px 0;">
+                    <div>❤️ HP: ${player.hp}/${player.maxHp}</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill hp-bar" style="width: ${(player.hp / player.maxHp) * 100}%"></div>
+                    </div>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <div>💙 MP: ${player.mp}/${player.maxMp}</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill mp-bar" style="width: ${(player.mp / player.maxMp) * 100}%"></div>
+                    </div>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <div>✨ EXP: ${player.exp}/${player.expToNext}</div>
+                    <div class="stat-bar">
+                        <div class="stat-fill exp-bar" style="width: ${(player.exp / player.expToNext) * 100}%"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 12px;">
+                    <div>⚔️ 힘: ${player.stats.strength}</div>
+                    <div>🛡️ 방어: ${player.stats.defense}</div>
+                    <div>💨 민첩: ${player.stats.agility}</div>
+                    <div>🔮 마법: ${player.stats.magic}</div>
+                </div>
+            `;
+        }
+
+        // 인벤토리 업데이트
+        function updateInventory() {
+            const inventoryContainer = document.getElementById('inventoryItems');
+            
+            if (!gameState.player.inventory || gameState.player.inventory.length === 0) {
+                inventoryContainer.innerHTML = '<div style="color: #666;">비어있음</div>';
+                return;
+            }
+
+            inventoryContainer.innerHTML = gameState.player.inventory.map(item => {
+                const countText = item.count ? ` (${item.count})` : '';
+                const useButton = item.type === 'consumable' ? 
+                    `<button onclick="gameManager.useItem('${item.id}', gameState.player); updateUI();" 
+                             style="margin-left: 10px; padding: 2px 6px; font-size: 10px; background: #4a90e2; color: white; border: none; border-radius: 3px; cursor: pointer;">사용</button>` 
+                    : '';
+                
+                return `<div style="margin: 5px 0; padding: 5px; background: #333; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>${item.name}${countText}</span>
+                    ${useButton}
+                </div>`;
+            }).join('');
+        }
+
+        // 현재 씬 로드
+        function loadCurrentScene() {
+            const scene = getScene(gameState.currentScene);
+            if (!scene) {
+                console.error('씬을 찾을 수 없음:', gameState.currentScene);
+                return;
+            }
+
+            // 스토리 텍스트 업데이트
+            document.getElementById('storyText').innerHTML = scene.text;
+
+            // 액션 버튼 생성
+            const actionsContainer = document.getElementById('gameActions');
+            actionsContainer.innerHTML = '';
+
+            // 보물상자 상태에 따라 액션 수정
+            const treasureKey = `treasure_${gameState.currentScene}`;
+            const modifiedActions = scene.actions.map(action => {
+                if (action.type === 'treasure' && gameState.progress.flags[treasureKey]) {
+                    return {
+                        text: '📦 비어있는 상자 (이미 수집함)',
+                        type: 'info'
+                    };
+                }
+                return action;
+            });
+
+            modifiedActions.forEach(action => {
+                const button = document.createElement('button');
+                button.className = 'action-btn';
+                button.textContent = action.text;
+                button.addEventListener('click', () => handleAction(action));
+                actionsContainer.appendChild(button);
+            });
+        }
+
+        // 액션 처리
+        function handleAction(action) {
+            console.log('액션 실행:', action);
+            
+            // 액션 타입에 따른 처리
+            switch (action.type) {
+                case 'move':
+                    gameState.currentScene = action.target;
+                    loadCurrentScene();
+                    autoSave();
+                    break;
+                    
+                case 'combat':
+                    // 층 정보가 있으면 전달, 없으면 기본값 1
+                    const floor = action.floor || 1;
+                    startCombat(action.enemy, action.onWin, floor);
+                    break;
+                    
+                case 'shop':
+                    openShop(action.shopId);
+                    break;
+                    
+                case 'use_item':
+                    gameManager.useItem(action.itemId, gameState.player);
+                    break;
+                    
+                case 'rest':
+                    gameManager.rest(gameState.player);
+                    autoSave();
+                    break;
+                    
+                case 'treasure':
+                    handleTreasure(action);
+                    break;
+                    
+                case 'sell':
+                    openSellMenu();
+                    break;
+                    
+                case 'info':
+                    // 정보성 메시지만 표시
+                    gameManager.showMessage(action.text || '이미 수집한 아이템입니다.', 'info');
+                    break;
+                    
+                default:
+                    console.log('알 수 없는 액션 타입:', action.type);
+            }
+        }
+
+        // 자동 저장
+        async function autoSave() {
+            try {
+                await saveGame();
+                console.log('자동 저장 완료');
+            } catch (error) {
+                console.error('자동 저장 실패:', error);
+            }
+        }
+
+        // 게임 저장
+        async function saveGame() {
+            if (!gameState || !currentUser || !currentSaveSlot) {
+                showError('저장할 게임 데이터가 없습니다.');
+                return;
+            }
+
+            try {
+                const saveData = {
+                    userId: currentUser.userId,
+                    saveSlot: currentSaveSlot,
+                    gameState: gameState,
+                    metadata: {
+                        lastSaved: new Date(),
+                        gameVersion: '1.0.0',
+                        saveDescription: getSaveDescription()
+                    }
+                };
+
+                await dbManager.saveGameData(saveData);
+                gameManager.showMessage('게임이 저장되었습니다.', 'success');
+            } catch (error) {
+                console.error('게임 저장 실패:', error);
+                gameManager.showMessage('게임을 저장할 수 없습니다.', 'error');
+            }
+        }
+
+        // 저장 설명 생성
+        function getSaveDescription() {
+            const scene = getScene(gameState.currentScene);
+            return scene ? scene.name : '알 수 없는 위치';
+        }
+
+        // 메뉴로 돌아가기
+        function backToMenu() {
+            if (confirm('메뉴로 돌아가시겠습니까? (현재 진행상황은 저장됩니다)')) {
+                saveGame().then(() => {
+                    showMainMenu();
+                });
+            }
+        }
+
+        // 임시 게임 데이터 (나중에 별도 파일로 분리)
+        function getScene(sceneId) {
+            const scenes = {
+                'town_start': {
+                    name: '마을 입구',
+                    text: `
+                        <h3>🏘️ 평화로운 마을</h3>
+                        <p>당신은 작은 마을의 입구에 서 있습니다. 멀리 어둠에 싸인 던전이 보입니다.</p>
+                        <p>마을 사람들이 당신을 바라보며 걱정스러운 표정을 짓고 있습니다.</p>
+                        <p><em>"던전에서 나오는 몬스터들 때문에 마을이 위험해지고 있어요. 용감한 모험가여, 도와주세요!"</em></p>
+                    `,
+                    actions: [
+                        { text: '🏰 던전으로 향한다', type: 'move', target: 'dungeon_entrance' },
+                        { text: '🏪 상점에 들른다', type: 'move', target: 'shop' },
+                        { text: '💬 마을 사람들과 대화한다', type: 'move', target: 'town_talk' }
+                    ]
+                },
+                'dungeon_entrance': {
+                    name: '던전 입구',
+                    text: `
+                        <h3>🏰 어둠의 던전 입구</h3>
+                        <p>차가운 기운이 흘러나오는 던전 입구입니다. 안에서 이상한 소리가 들려옵니다.</p>
+                        <p>입구에 낡은 표지판이 있습니다: <em>"마법사 길드의 시험장 - 입문자는 1층부터 도전하라"</em></p>
+                    `,
+                    actions: [
+                        { text: '⚔️ 던전 1층으로 들어간다', type: 'move', target: 'dungeon_1' },
+                        { text: '🔙 마을로 돌아간다', type: 'move', target: 'town_start' }
+                    ]
+                },
+                'shop': {
+                    name: '마을 상점',
+                    text: `
+                        <h3>🏪 잡화상점</h3>
+                        <p>친절한 상인이 반갑게 맞이합니다.</p>
+                        <p><em>"어서오세요! 던전 탐험에 필요한 것들을 판매하고 있어요."</em></p>
+                    `,
+                    actions: [
+                        { text: '🍺 체력 포션 구매 (30골드)', type: 'shop', shopId: 'buy_potion' },
+                        { text: '⚔️ 무기 보기', type: 'shop', shopId: 'weapons' },
+                        { text: '🔙 밖으로 나간다', type: 'move', target: 'town_start' }
+                    ]
+                },
+                'dungeon_1': {
+                    name: '던전 1층',
+                    text: `
+                        <h3>⚔️ 던전 1층</h3>
+                        <p>어둡고 축축한 던전 내부입니다. 멀리서 으르렁거리는 소리가 들립니다.</p>
+                        <p>갈래길이 나타났습니다. 어느 길로 가시겠습니까?</p>
+                    `,
+                    actions: [
+                        { text: '➡️ 오른쪽 통로로 간다', type: 'combat', enemy: 'goblin' },
+                        { text: '⬅️ 왼쪽 통로로 간다', type: 'move', target: 'dungeon_1_treasure' },
+                        { text: '🔙 던전 입구로 돌아간다', type: 'move', target: 'dungeon_entrance' }
+                    ]
+                }
+            };
+
+            return scenes[sceneId] || null;
+        }
+
+        // 전투 시작 (game-core.js에서 구현됨)
+        // 아이템 사용 (game-core.js에서 구현됨)
+        // 상점 열기 (game-core.js에서 구현됨)
+        
+        // 보물상자 처리 (일회성)
+        function handleTreasure(action) {
+            // 현재 씬을 기반으로 고유 키 생성
+            const treasureKey = `treasure_${gameState.currentScene}`;
+            
+            // 이미 수집한 보물인지 확인
+            if (gameState.progress.flags[treasureKey]) {
+                gameManager.showMessage('이미 수집한 보물상자입니다.', 'info');
+                return;
+            }
+            
+            // 보물 획득 처리
+            gameManager.gainTreasure(action.rewards, gameState.player);
+            
+            // 수집 완료 플래그 설정
+            gameState.progress.flags[treasureKey] = true;
+            
+            // 현재 씬 다시 로드하여 보물상자 상태 업데이트
+            updateTreasureScene();
+            
+            autoSave();
+        }
+        
+        // 보물상자 수집 후 씬 업데이트
+        function updateTreasureScene() {
+            const treasureKey = `treasure_${gameState.currentScene}`;
+            const currentScene = getScene(gameState.currentScene);
+            
+            if (currentScene && gameState.progress.flags[treasureKey]) {
+                // 보물상자를 이미 열었으면 액션을 변경
+                const treasureActionIndex = currentScene.actions.findIndex(action => action.type === 'treasure');
+                if (treasureActionIndex !== -1) {
+                    currentScene.actions[treasureActionIndex] = {
+                        text: '📦 비어있는 상자 (이미 수집함)',
+                        type: 'info'
+                    };
+                }
+            }
+            
+            // UI 업데이트
+            loadCurrentScene();
+        }
+
+        // 아이템 판매 메뉴 열기
+        function openSellMenu() {
+            const player = gameState.player;
+            
+            // 인벤토리 초기화 (구 세이브 데이터 호환성)
+            if (!player.inventory) {
+                player.inventory = [];
+            }
+            
+            // 판매 가능한 아이템 필터링 (무기나 방어구는 제외)
+            const sellableItems = player.inventory.filter(item => 
+                item.type === 'consumable' || 
+                (item.id !== 'sword' && item.type !== 'weapon') // 기본 무기는 판매 불가
+            );
+            
+            if (sellableItems.length === 0) {
+                gameManager.showMessage('판매할 수 있는 아이템이 없습니다.', 'error');
+                return;
+            }
+            
+            updateSellUI(sellableItems);
+        }
+        
+        // 판매 UI 업데이트
+        function updateSellUI(sellableItems) {
+            const storyText = document.getElementById('storyText');
+            const actionsContainer = document.getElementById('gameActions');
+            
+            storyText.innerHTML = `
+                <h3>💰 아이템 판매</h3>
+                <p>상인: "어떤 물건을 팔고 싶으신가요? 시장 가격의 70%에 사드리겠습니다."</p>
+                <p>💰 현재 골드: ${gameState.player.gold}</p>
+            `;
+            
+            actionsContainer.innerHTML = '';
+            
+            // 판매 가능한 아이템 목록
+            sellableItems.forEach(item => {
+                const itemData = gameManager.getItem(item.id);
+                if (itemData && itemData.price) {
+                    const sellPrice = Math.floor(itemData.price * 0.7); // 70% 가격으로 판매
+                    const countText = item.count && item.count > 1 ? ` (${item.count})` : '';
+                    
+                    const button = document.createElement('button');
+                    button.className = 'action-btn';
+                    button.textContent = `${item.name}${countText} - ${sellPrice}G`;
+                    button.addEventListener('click', () => sellItem(item.id, sellPrice));
+                    actionsContainer.appendChild(button);
+                }
+            });
+            
+            // 나가기 버튼
+            const exitButton = document.createElement('button');
+            exitButton.className = 'action-btn';
+            exitButton.textContent = '🔙 나가기';
+            exitButton.addEventListener('click', () => {
+                loadCurrentScene(); // 원래 상점 화면으로 돌아가기
+            });
+            actionsContainer.appendChild(exitButton);
+        }
+        
+        // 아이템 판매 처리
+        function sellItem(itemId, sellPrice) {
+            const player = gameState.player;
+            
+            // 인벤토리 초기화 (구 세이브 데이터 호환성)
+            if (!player.inventory) {
+                player.inventory = [];
+            }
+            
+            const itemIndex = player.inventory.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) {
+                gameManager.showMessage('아이템을 찾을 수 없습니다.', 'error');
+                return;
+            }
+            
+            const item = player.inventory[itemIndex];
+            
+            // 골드 추가
+            player.gold += sellPrice;
+            
+            // 아이템 개수 감소 또는 제거
+            if (item.count && item.count > 1) {
+                item.count--;
+                gameManager.showMessage(`${item.name}을(를) ${sellPrice}골드에 판매했습니다!`, 'success');
+            } else {
+                player.inventory.splice(itemIndex, 1);
+                gameManager.showMessage(`${item.name}을(를) ${sellPrice}골드에 판매했습니다!`, 'success');
+            }
+            
+            // UI 업데이트
+            updateUI();
+            
+            // 판매 가능한 아이템 다시 확인
+            const sellableItems = player.inventory.filter(item => 
+                item.type === 'consumable' || 
+                (item.id !== 'sword' && item.type !== 'weapon')
+            );
+            
+            if (sellableItems.length === 0) {
+                gameManager.showMessage('더 이상 판매할 수 있는 아이템이 없습니다.', 'info');
+                setTimeout(() => {
+                    loadCurrentScene(); // 상점 메뉴로 돌아가기
+                }, 2000);
+            } else {
+                updateSellUI(sellableItems); // 판매 UI 새로고침
+            }
+        }
+    </script>
+
+    <script src="js/indexeddb-manager.js"></script>
+    <script src="js/game-core.js"></script>
+</body>
+</html>
