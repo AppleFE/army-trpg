@@ -309,16 +309,16 @@ class DungeonGenerator {
     constructor() {
         this.floorThemes = {
             1: { name: '지하 동굴', monsters: ['goblin', 'bat', 'slime'], color: '🏴', treasureRate: 0.3 },
-            11: { name: '언데드 무덤', monsters: ['skeleton', 'zombie'], color: '💀', treasureRate: 0.4 },
-            21: { name: '마법 유적', monsters: ['golem', 'harpy'], color: '🔮', treasureRate: 0.5 },
-            31: { name: '야수 소굴', monsters: ['troll', 'ogre'], color: '🐾', treasureRate: 0.6 },
-            41: { name: '저주받은 사원', monsters: ['mummy', 'wyvern'], color: '🏛️', treasureRate: 0.7 },
-            51: { name: '악마의 영역', monsters: ['lich', 'chimera', 'minotaur'], color: '🔥', treasureRate: 0.8 },
-            61: { name: '그림자 차원', monsters: ['demon', 'succubus', 'shadow_beast'], color: '🌚', treasureRate: 0.9 },
-            71: { name: '심연의 둥지', monsters: ['hydra', 'beholder'], color: '🐍', treasureRate: 1.0 },
-            81: { name: '천상의 감옥', monsters: ['titan', 'archdemon', 'void_spawn'], color: '🌌', treasureRate: 1.2 },
-            91: { name: '종말의 전장', monsters: ['shadow_lord', 'chaos_beast', 'celestial_guardian'], color: '💥', treasureRate: 1.5 },
-            100: { name: '절대자의 방', monsters: ['void_emperor', 'omega_sentinel', 'god_of_dungeon'], color: '👑', treasureRate: 2.0 }
+            11: { name: '언데드 무덤', monsters: ['orc', 'skeleton', 'zombie'], color: '💀', treasureRate: 0.4 },
+            21: { name: '마법 유적', monsters: ['golem', 'harpy', 'troll'], color: '🔮', treasureRate: 0.5 },
+            31: { name: '야수 소굴', monsters: ['ogre', 'mummy', 'wyvern'], color: '🐾', treasureRate: 0.6 },
+            41: { name: '저주받은 사원', monsters: ['lich', 'chimera', 'minotaur'], color: '🏛️', treasureRate: 0.7 },
+            51: { name: '악마의 영역', monsters: ['demon', 'succubus', 'shadow_beast'], color: '🔥', treasureRate: 0.8 },
+            61: { name: '심연의 둥지', monsters: ['hydra', 'beholder', 'ancient_dragon'], color: '🐍', treasureRate: 0.9 },
+            71: { name: '타이탄의 영역', monsters: ['titan', 'archdemon', 'void_spawn'], color: '🌌', treasureRate: 1.0 },
+            81: { name: '혼돈의 차원', monsters: ['shadow_lord', 'chaos_beast', 'celestial_guardian'], color: '💥', treasureRate: 1.2 },
+            91: { name: '종말의 전장', monsters: ['void_emperor', 'omega_sentinel', 'god_of_dungeon'], color: '👑', treasureRate: 1.5 },
+            100: { name: '절대자의 방', monsters: ['god_of_dungeon'], color: '👑', treasureRate: 2.0 }
         };
     }
 
