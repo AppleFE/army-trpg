@@ -1042,14 +1042,29 @@ class CombatSystem {
     }
 
     /**
-     * 적 턴
+     * 적 턴 처리 (지연 및 메시지 추가)
      */
     enemyTurn(damageMultiplier = 1.0) {
+        const actionsContainer = document.getElementById('gameActions');
+        // 플레이어의 행동이 끝났음을 알리고, 적의 턴임을 명시적으로 표시
+        actionsContainer.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">적의 턴...</p>';
+
+        setTimeout(() => {
+            if (this.isInCombat) {
+                this.performEnemyAttack(damageMultiplier);
+            }
+        }, 1200); // 1.2초 지연 후 몬스터 공격
+    }
+
+    /**
+     * 실제 적 공격 실행
+     */
+    performEnemyAttack(damageMultiplier = 1.0) {
         const player = gameState.player;
         const damage = Math.max(1, Math.floor((this.currentEnemy.attack + Math.floor(Math.random() * 3) - player.stats.defense) * damageMultiplier));
         
         player.hp -= damage;
-        gameManager.showMessage(`👹 ${this.currentEnemy.name}이(가) ${damage}의 데미지를 입혔습니다!`, 'error');
+        gameManager.showMessage(`👹 ${this.currentEnemy.name}의 반격! 당신은 ${damage}의 데미지를 입었습니다!`, 'error');
 
         if (player.hp <= 0) {
             this.playerLose();
@@ -1057,7 +1072,7 @@ class CombatSystem {
         }
 
         updateUI();
-        this.updateCombatUI();
+        this.updateCombatUI(); // UI를 다시 그려 플레이어 행동 버튼 활성화
     }
 
     /**
